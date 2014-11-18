@@ -40,10 +40,6 @@ public class NaiveBayes {
 		this(FileIO.readRecords(trainFileName),FileIO.readRecords(testFileName));
 	}
 	
-//	public void train(String trainFile){
-//		trainSample = FileIO.readRecords(trainFile);
-//		train();
-//	}
 	
 	public void train(){
 		if(trainSample == null){
@@ -52,9 +48,6 @@ public class NaiveBayes {
 		}
 		for(Record r : trainSample){
 			totalSample++;
-//			if(r.getMaxIndex() > totalAttributes){
-//				totalAttributes = r.getMaxIndex();
-//			}
 			processTrainRecord(r);
 		}
 	}
@@ -132,7 +125,11 @@ public class NaiveBayes {
 	
 	
 	public static void main(String[] args) {
-		NaiveBayes nb = new NaiveBayes("adult.train","adult.test");
+		if(args.length != 2){
+			System.out.println("usage: java NaiveBayes training_file test_file");
+			return;
+		}
+		NaiveBayes nb = new NaiveBayes(args[0],args[1]);
 		String result = nb.testTrainSample();
 		result += "\n" + nb.testTestSample();
 		System.out.println(result);
