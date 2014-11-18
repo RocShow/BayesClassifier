@@ -159,7 +159,7 @@ public class NBAdaBoost {
 			System.out.println("usage: java NaiveBayes training_file test_file");
 			return;
 		}
-		NBAdaBoost nba = new NBAdaBoost(1, args[0], args[1]);
+		NBAdaBoost nba = new NBAdaBoost(90, args[0], args[1]);
 		String result = nba.testTrainSample();
 		result += "\n" + nba.testTestSample();
 		System.out.println(result);

@@ -19,8 +19,10 @@ public class NaiveBayes {
 	
 	double pPositive = 0;
 	double pNegative = 0;
-	double[] positiveConditions;
-	double[] negativeConditions;
+	double[] positiveExistConditions;
+	double[] negativeExistConditions;
+	double[] positiveNonExistConditions;
+	double[] negativeNonExistConditions;
 	
 	public NaiveBayes(LinkedList<Record> _trainSample, LinkedList<Record> _testSample){
 		this.trainSample = _trainSample;
@@ -36,8 +38,10 @@ public class NaiveBayes {
 				totalAttributes = r.getMaxIndex();
 			}
 		}
-		positiveConditions = new double[totalAttributes + 1];
-		negativeConditions = new double[totalAttributes + 1];
+		positiveExistConditions = new double[totalAttributes + 1];
+		negativeExistConditions = new double[totalAttributes + 1];
+		positiveNonExistConditions = new double[totalAttributes + 1];
+		negativeNonExistConditions = new double[totalAttributes + 1];
 		train();
 	}
 	
@@ -60,8 +64,12 @@ public class NaiveBayes {
 		for(int i = 0; i <= totalAttributes; i++){
 			int indexCountsInPositive = positiveMap.get(i) == null ? 1 : positiveMap.get(i) + 1;
 			int indexCountsInNegative = negativeMap.get(i) == null ? 1 : negativeMap.get(i) + 1;
-			positiveConditions[i] = (double)indexCountsInPositive / (positiveSample + 2);
-			negativeConditions[i] = (double)indexCountsInNegative/ (negativeSample + 2);
+			int indexNonExistPositive = positiveSample - indexCountsInPositive + 2;
+			int indexNonExistNegative = negativeSample - indexCountsInNegative + 2; 
+			positiveExistConditions[i] = (double)indexCountsInPositive / (positiveSample + 2);
+			negativeExistConditions[i] = (double)indexCountsInNegative/ (negativeSample + 2);
+			positiveNonExistConditions[i] = (double)indexNonExistPositive / (positiveSample + 2);
+			negativeNonExistConditions[i] = (double)indexNonExistNegative/ (negativeSample + 2);
 		}
 		
 		pPositive = (double)(positiveSample + 2) / (totalSample + 4);
@@ -97,10 +105,22 @@ public class NaiveBayes {
 		LinkedList<Integer[]> attributes = r.getAttributes();
 		double pxPositive = 1;
 		double pxNegative = 1;
-		for(Integer[] pair : attributes){
-			pxPositive *= positiveConditions[pair[0]];
-			pxNegative *= negativeConditions[pair[0]];
+		
+		for(int i = 0, j = 0; i <= totalAttributes; i++){
+			if(j < attributes.size() && i == attributes.get(j)[0]){
+				pxPositive *= positiveExistConditions[i];
+				pxNegative *= negativeExistConditions[i];
+				j++;
+			} else {
+				pxPositive *= positiveNonExistConditions[i];
+				pxNegative *= negativeNonExistConditions[i];
+			}
 		}
+		
+//		for(Integer[] pair : attributes){
+//			pxPositive *= positiveExistConditions[pair[0]];
+//			pxNegative *= negativeExistConditions[pair[0]];
+//		}
 		double possibilityOfPositive = pxPositive * pPositive;
 		double possibilityOfNegative = pxNegative * pNegative;
 		
