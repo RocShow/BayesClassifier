@@ -18,9 +18,9 @@ public class NaiveBayes {
 	LinkedList<Record> trainSample = null;
 	LinkedList<Record> testSample = null;
 	
-	public NaiveBayes(String trainFileName, String testFileName){
-		trainSample = FileIO.readRecords(trainFileName);
-		testSample = FileIO.readRecords(testFileName);
+	public NaiveBayes(LinkedList<Record> _trainSample, LinkedList<Record> _testSample){
+		this.trainSample = _trainSample;
+		this.testSample = _testSample;
 		positiveMap = new HashMap<Integer, Integer>();
 		negativeMap = new HashMap<Integer, Integer>();
 		for(Record r : trainSample){
@@ -36,6 +36,10 @@ public class NaiveBayes {
 		train();
 	}
 	
+	public NaiveBayes(String trainFileName, String testFileName){
+		this(FileIO.readRecords(trainFileName),FileIO.readRecords(testFileName));
+	}
+	
 //	public void train(String trainFile){
 //		trainSample = FileIO.readRecords(trainFile);
 //		train();
@@ -48,9 +52,9 @@ public class NaiveBayes {
 		}
 		for(Record r : trainSample){
 			totalSample++;
-			if(r.getMaxIndex() > totalAttributes){
-				totalAttributes = r.getMaxIndex();
-			}
+//			if(r.getMaxIndex() > totalAttributes){
+//				totalAttributes = r.getMaxIndex();
+//			}
 			processTrainRecord(r);
 		}
 	}
