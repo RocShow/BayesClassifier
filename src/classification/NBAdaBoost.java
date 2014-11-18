@@ -53,6 +53,10 @@ public class NBAdaBoost {
 				i--;
 				continue;
 			}
+			if(e == 0){
+				totalRound = i + 1;
+				break;
+			}
 			//updating weights for tuples 
 			double totalWeight = 0;
 			for(int j = 0; j < sampleSize; j++){
@@ -159,7 +163,7 @@ public class NBAdaBoost {
 			System.out.println("usage: java NaiveBayes training_file test_file");
 			return;
 		}
-		NBAdaBoost nba = new NBAdaBoost(90, args[0], args[1]);
+		NBAdaBoost nba = new NBAdaBoost(10, args[0], args[1]);
 		String result = nba.testTrainSample();
 		result += "\n" + nba.testTestSample();
 		System.out.println(result);
