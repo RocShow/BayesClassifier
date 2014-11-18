@@ -8,8 +8,7 @@ import HelpPacket.Record;
 
 //Binary NaiveBayes
 public class NaiveBayes {
-	private HashMap<Integer,Integer> positiveMap;
-	private HashMap<Integer,Integer> negativeMap;
+	
 	int totalSample = 0;
 	int positiveSample = 0;
 	int negativeSample = 0;
@@ -18,21 +17,27 @@ public class NaiveBayes {
 	LinkedList<Record> trainSample = null;
 	LinkedList<Record> testSample = null;
 	
+	double pPositive = 0;
+	double pNegative = 0;
+	double[] positiveConditions;
+	double[] negativeConditions;
+	
 	public NaiveBayes(LinkedList<Record> _trainSample, LinkedList<Record> _testSample){
 		this.trainSample = _trainSample;
 		this.testSample = _testSample;
-		positiveMap = new HashMap<Integer, Integer>();
-		negativeMap = new HashMap<Integer, Integer>();
+		
 		for(Record r : trainSample){
 			if(r.getMaxIndex() > totalAttributes){
 				totalAttributes = r.getMaxIndex();
 			}
 		}
-		for(Record r : trainSample){
+		for(Record r : testSample){
 			if(r.getMaxIndex() > totalAttributes){
 				totalAttributes = r.getMaxIndex();
 			}
 		}
+		positiveConditions = new double[totalAttributes + 1];
+		negativeConditions = new double[totalAttributes + 1];
 		train();
 	}
 	
@@ -42,14 +47,46 @@ public class NaiveBayes {
 	
 	
 	public void train(){
+		HashMap<Integer,Integer> positiveMap = new HashMap<Integer, Integer>();
+		HashMap<Integer,Integer> negativeMap = new HashMap<Integer, Integer>();
 		if(trainSample == null){
 			System.out.println("You have to specify a train file.");
 			return;
 		}
 		for(Record r : trainSample){
 			totalSample++;
-			processTrainRecord(r);
+			processTrainRecord(positiveMap, negativeMap, r);
 		}
+		for(int i = 0; i <= totalAttributes; i++){
+			int indexCountsInPositive = positiveMap.get(i) == null ? 1 : positiveMap.get(i) + 1;
+			int indexCountsInNegative = negativeMap.get(i) == null ? 1 : negativeMap.get(i) + 1;
+			positiveConditions[i] = (double)indexCountsInPositive / (positiveSample + 2);
+			negativeConditions[i] = (double)indexCountsInNegative/ (negativeSample + 2);
+		}
+		
+		pPositive = (double)(positiveSample + 2) / (totalSample + 4);
+		pNegative = (double)(negativeSample + 2) / (totalSample + 4);
+		
+//		System.out.println("pPositive:" + pPositive);
+//		System.out.println("pNegative" + pNegative);
+//		for(int i = 0; i <= totalAttributes; i++){
+//			System.out.println("Index " + i + " Positive: " + positiveConditions[i] + " Negative: " + negativeConditions[i]);
+//		}
+//		pPositive:0.6428571428571429
+//		pNegative0.35714285714285715
+//		Index 0 Positive: 0.2222222222222222 Negative: 0.6
+//		Index 1 Positive: 0.4444444444444444 Negative: 0.0
+//		Index 2 Positive: 0.3333333333333333 Negative: 0.4
+//		Index 3 Positive: 0.2222222222222222 Negative: 0.4
+//		Index 4 Positive: 0.4444444444444444 Negative: 0.4
+//		Index 5 Positive: 0.3333333333333333 Negative: 0.2
+//		Index 6 Positive: 0.6666666666666666 Negative: 0.2
+//		Index 7 Positive: 0.3333333333333333 Negative: 0.8
+//		Index 8 Positive: 0.3333333333333333 Negative: 0.6
+//		Index 9 Positive: 0.6666666666666666 Negative: 0.4
+//		9 0 1 4
+//		9 0 1 4
+
 	}
 	
 	public String classify(Record r){
@@ -58,18 +95,14 @@ public class NaiveBayes {
 			return null;
 		}
 		LinkedList<Integer[]> attributes = r.getAttributes();
-		float pxPositive = 1;
-		float pxNegative = 1;
-		float pPositive = (float)positiveSample / totalSample;
-		float pNegative = (float)negativeSample / totalSample;
+		double pxPositive = 1;
+		double pxNegative = 1;
 		for(Integer[] pair : attributes){
-			int indexCountsInPositive = positiveMap.get(pair[0]) == null ? 1 : positiveMap.get(pair[0]) + 1;
-			int indexCountsInNegative = negativeMap.get(pair[0]) == null ? 1 : negativeMap.get(pair[0]) + 1;
-			pxPositive *= (float)indexCountsInPositive / (positiveSample + totalAttributes + 1);
-			pxNegative *= (float)indexCountsInNegative / (negativeSample + totalAttributes + 1);
+			pxPositive *= positiveConditions[pair[0]];
+			pxNegative *= negativeConditions[pair[0]];
 		}
-		float possibilityOfPositive = pxPositive * pPositive;
-		float possibilityOfNegative = pxNegative * pNegative;
+		double possibilityOfPositive = pxPositive * pPositive;
+		double possibilityOfNegative = pxNegative * pNegative;
 		
 		return possibilityOfPositive >= possibilityOfNegative ? "+1" : "-1";
 	}
@@ -107,7 +140,7 @@ public class NaiveBayes {
 		return "" + tp + " " + fn + " " + fp + " " + tn;
 	}
 	
-	private void processTrainRecord(Record r){
+	private void processTrainRecord(HashMap<Integer,Integer> positiveMap, HashMap<Integer,Integer> negativeMap, Record r){
 		LinkedList<Integer[]> attributes = r.getAttributes();
 		HashMap<Integer, Integer> map = null;
 		if(r.getLabel().equals("-1")){
@@ -130,6 +163,7 @@ public class NaiveBayes {
 			return;
 		}
 		NaiveBayes nb = new NaiveBayes(args[0],args[1]);
+		//NaiveBayes nb = new NaiveBayes("test.train", "test.train");
 		String result = nb.testTrainSample();
 		result += "\n" + nb.testTestSample();
 		System.out.println(result);

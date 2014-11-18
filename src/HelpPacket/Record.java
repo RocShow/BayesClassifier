@@ -3,7 +3,7 @@ package HelpPacket;
 import java.util.LinkedList;
 
 public class Record {
-	float weight = 1F;
+	double weight = 1d;
 	String label = "";
 	int maxIndex = 0;
 	LinkedList<Integer[]> attributes;
@@ -28,11 +28,11 @@ public class Record {
 		return label;
 	}
 	
-	public float getWeight(){
+	public double getWeight(){
 		return weight;
 	}
 	
-	public void setWeight(float weight){
+	public void setWeight(double weight){
 		this.weight = weight;
 	}
 	
