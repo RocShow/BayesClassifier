@@ -19,10 +19,7 @@ public class NaiveBayes {
 	
 	double pPositive = 0;
 	double pNegative = 0;
-	double[] positiveExistConditions;
-	double[] negativeExistConditions;
-	double[] positiveNonExistConditions;
-	double[] negativeNonExistConditions;
+	double[][][] conditionalProbility; //1:attributes, 2:positive/negative, 3:categories,0(+1),1(-1)
 	
 	public NaiveBayes(LinkedList<Record> _trainSample, LinkedList<Record> _testSample){
 		this.trainSample = _trainSample;
@@ -38,10 +35,7 @@ public class NaiveBayes {
 				totalAttributes = r.getMaxIndex();
 			}
 		}
-		positiveExistConditions = new double[totalAttributes + 1];
-		negativeExistConditions = new double[totalAttributes + 1];
-		positiveNonExistConditions = new double[totalAttributes + 1];
-		negativeNonExistConditions = new double[totalAttributes + 1];
+		conditionalProbility = new double[totalAttributes + 1][2][2];
 		train();
 	}
 	
@@ -64,12 +58,10 @@ public class NaiveBayes {
 		for(int i = 0; i <= totalAttributes; i++){
 			int indexCountsInPositive = positiveMap.get(i) == null ? 1 : positiveMap.get(i) + 1;
 			int indexCountsInNegative = negativeMap.get(i) == null ? 1 : negativeMap.get(i) + 1;
-			int indexNonExistPositive = positiveSample - indexCountsInPositive + 2;
-			int indexNonExistNegative = negativeSample - indexCountsInNegative + 2; 
-			positiveExistConditions[i] = (double)indexCountsInPositive / (positiveSample + 2);
-			negativeExistConditions[i] = (double)indexCountsInNegative/ (negativeSample + 2);
-			positiveNonExistConditions[i] = (double)indexNonExistPositive / (positiveSample + 2);
-			negativeNonExistConditions[i] = (double)indexNonExistNegative/ (negativeSample + 2);
+			conditionalProbility[i][0][0] = (double)indexCountsInPositive/ (positiveSample + 2);
+			conditionalProbility[i][0][1] = 1 - conditionalProbility[i][0][0];
+			conditionalProbility[i][1][0] = (double)indexCountsInNegative / (negativeSample + 2);
+			conditionalProbility[i][1][1] = 1 - conditionalProbility[i][1][0];
 		}
 		
 		pPositive = (double)(positiveSample + 2) / (totalSample + 4);
@@ -108,19 +100,15 @@ public class NaiveBayes {
 		
 		for(int i = 0, j = 0; i <= totalAttributes; i++){
 			if(j < attributes.size() && i == attributes.get(j)[0]){
-				pxPositive *= positiveExistConditions[i];
-				pxNegative *= negativeExistConditions[i];
+				pxPositive *= conditionalProbility[i][0][0];
+				pxNegative *= conditionalProbility[i][1][0];
 				j++;
 			} else {
-				pxPositive *= positiveNonExistConditions[i];
-				pxNegative *= negativeNonExistConditions[i];
+				pxPositive *= conditionalProbility[i][0][1];
+				pxNegative *= conditionalProbility[i][1][1];
 			}
 		}
 		
-//		for(Integer[] pair : attributes){
-//			pxPositive *= positiveExistConditions[pair[0]];
-//			pxNegative *= negativeExistConditions[pair[0]];
-//		}
 		double possibilityOfPositive = pxPositive * pPositive;
 		double possibilityOfNegative = pxNegative * pNegative;
 		
