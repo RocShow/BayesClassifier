@@ -44,7 +44,7 @@ public class NBAdaBoost {
 					e += r.getWeight();
 				}
 			}
-			System.out.println(e);
+			//System.out.println(e);
 			if(e > enlargeFactor){
 				System.out.println("e > 1, e = " + e);
 			}
@@ -57,7 +57,7 @@ public class NBAdaBoost {
 				continue;
 			}
 			if(e == 0){
-				System.out.println("e == 0");
+				//System.out.println("e == 0");
 				//totalRound = i + 1;
 				//break;
 			}
@@ -193,7 +193,7 @@ public class NBAdaBoost {
 			System.out.println("usage: java NaiveBayes training_file test_file");
 			return;
 		}
-		NBAdaBoost nba = new NBAdaBoost(1, args[0], args[1]);
+		NBAdaBoost nba = new NBAdaBoost(10, args[0], args[1]);
 		String result = nba.testTrainSample();
 		result += "\n" + nba.testTestSample();
 		System.out.println(result);

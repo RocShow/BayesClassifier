@@ -6,6 +6,7 @@ public class Record {
 	double weight = 1d;
 	String label = "";
 	int maxIndex = 0;
+	int maxValue = 0;
 	LinkedList<Integer[]> attributes;
 	
 	public Record(String line){
@@ -20,6 +21,9 @@ public class Record {
 			attributes.add(data);
 			if(data[0] > maxIndex){
 				maxIndex = data[0];
+			}
+			if(data[1] > maxValue){
+				maxValue = data[1];
 			}
 		}
 	}
@@ -38,6 +42,10 @@ public class Record {
 	
 	public int getMaxIndex(){
 		return maxIndex;
+	}
+	
+	public int getMaxValue(){
+		return maxValue;
 	}
 	
 	public LinkedList<Integer[]> getAttributes(){

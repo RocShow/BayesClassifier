@@ -12,7 +12,9 @@ public class FileIO {
 		try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
 			String line = "";
 			while ((line = br.readLine()) != null) {
-				result.add(new Record(line));
+				if(line.length() > 0){
+					result.add(new Record(line));
+				}
 			}
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
