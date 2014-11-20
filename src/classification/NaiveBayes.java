@@ -1,6 +1,5 @@
 package classification;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 
 import HelpPacket.FileIO;
@@ -14,6 +13,8 @@ public class NaiveBayes {
 	int negativeSample = 0;
 	int totalAttributes = 0; //start from 0
 	int maxValue = 0;
+	int confidentPrediction = 0;
+	int unconfidentPresiction = 0;
 	
 	LinkedList<Record> trainSample = null;
 	LinkedList<Record> testSample = null;
@@ -136,6 +137,12 @@ public class NaiveBayes {
 		double possibilityOfPositive = pxPositive * pPositive;
 		double possibilityOfNegative = pxNegative * pNegative;
 		//System.out.println("p:" + possibilityOfPositive + "--n:" + possibilityOfNegative);
+		if((possibilityOfPositive - possibilityOfNegative) > 8 * possibilityOfNegative ||
+				(possibilityOfNegative - possibilityOfPositive > 8 * possibilityOfPositive)){
+			confidentPrediction++;
+		} else {
+			unconfidentPresiction++;
+		}
 		return possibilityOfPositive >= possibilityOfNegative ? "+1" : "-1";
 	}
 	
@@ -148,6 +155,7 @@ public class NaiveBayes {
 	}
 	
 	private String test(LinkedList<Record> sample){
+		confidentPrediction = unconfidentPresiction = 0;
 		if(sample == null){
 			System.out.println("You have to specify a record set.");
 			return null;
@@ -169,6 +177,8 @@ public class NaiveBayes {
 				}
 			}
 		}
+		System.out.println("confident:" + confidentPrediction + ", " + (double)confidentPrediction * 100 / sample.size() + "%"
+				+"     unconfident: " + unconfidentPresiction + ", " + (double)unconfidentPresiction  * 100/ sample.size() + "%");
 		return "" + tp + " " + fn + " " + fp + " " + tn;
 	}
 	
