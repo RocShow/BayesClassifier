@@ -46,6 +46,16 @@ public class NaiveBayes {
 		train();
 	}
 	
+	public NaiveBayes(LinkedList<Record> _trainSample, int _totalAttributes, int _totalValues){
+		this.trainSample = _trainSample;
+		
+		totalAttributes = _totalAttributes;
+		maxValue = _totalValues;
+		conditionalProbility = new double[totalAttributes + 1][2][maxValue + 1];
+		//System.out.println("total attribtues:" + totalAttributes);
+		train();
+	}
+	
 	public NaiveBayes(String trainFileName, String testFileName){
 		this(FileIO.readRecords(trainFileName),FileIO.readRecords(testFileName));
 	}

@@ -9,7 +9,7 @@ import HelpPacket.Record;
 
 public class NBAdaBoost {
 	int totalRound;
-	int sampleSize;
+	//int sampleSize;
 	double e;
 	NaiveBayes[] classifiers;
 	double[] weights;
@@ -17,16 +17,37 @@ public class NBAdaBoost {
 	LinkedList<Record> fullTest;
 	static double enlargeFactor = 1f;
 	Random ra = new Random();
+	int maxAttribute = 0;
+	int totalValue = 0;
 	public NBAdaBoost(int totalRound, String trainFile, String testFile){
 		fullTrain = FileIO.readRecords(trainFile);
 		fullTest = FileIO.readRecords(testFile);
+		
+		//get totalAttributes and totalValues
+		for(Record r : fullTrain){
+			if(r.getMaxIndex() > maxAttribute){
+				maxAttribute = r.getMaxIndex();
+			}
+			if(r.getMaxValue() > totalValue){
+				totalValue = r.getMaxValue();
+			}
+		}
+		for(Record r : fullTest){
+			if(r.getMaxIndex() > maxAttribute){
+				maxAttribute = r.getMaxIndex();
+			}
+			if(r.getMaxValue() > totalValue){
+				totalValue = r.getMaxValue();
+			}
+		}
+		
 		this.totalRound = totalRound;
-		this.sampleSize = fullTrain.size();
+		//this.sampleSize = fullTrain.size();
 		classifiers = new NaiveBayes[totalRound];
 		weights = new double[totalRound];
 		e = 0F;
 		ra.setSeed(1);
-		resetWeight();
+		resetWeight(fullTrain);
 		train();
 	}
 	
@@ -34,6 +55,7 @@ public class NBAdaBoost {
 		for(int i = 0; i < totalRound; i++){
 			//System.out.println("round " + i);
 			LinkedList<Record> sample = getSample();
+			int sampleSize = sample.size();
 			//System.out.println(sample.size());
 //			for(int h = 0; h < sample.size(); h++){
 //				System.out.println(sample.get(h).getWeight() + sample.get(h).getLabel());
@@ -41,27 +63,35 @@ public class NBAdaBoost {
 			
 			String[] results = new String[sampleSize];
 			//what if sample and fullTest can't cover the actual max attributes?
-			classifiers[i] = new NaiveBayes(sample,fullTest);
+			classifiers[i] = new NaiveBayes(sample, maxAttribute, totalValue);
 			e = 0;
+			double wrongCount = 0;
 			//computing e
 			for(int j = 0; j < sampleSize; j++){
 				Record r = sample.get(j);
 				String result = classifiers[i].classify(r);
 				results[j] = result;
 				if(!result.equals(r.getLabel())){
-					//e += r.getWeight();
+					e += r.getWeight();
+					wrongCount++;
 					//System.out.println(r.getWeight());
-					e++;
+					//e++;
 					//System.out.println(e);
 				}
 			}
-			e = e / sampleSize;
+			wrongCount /= sampleSize;
+			//e = e / sampleSize;
 			//System.out.println(e);
 //			if(e > enlargeFactor){
 //				System.out.println("e > 1, e = " + e);
 //			}
+			if(wrongCount > 0.5){
+				//System.out.println("Wrong Count > 0.5 " + wrongCount);
+				i--;
+				continue;
+			}
 			if(e > enlargeFactor * 0.5){
-				System.out.println("e > 0.5, e = " + e);
+				//System.out.println("e > 0.5, e = " + e);
 //				for(int j = 0; j < sampleSize; j++){
 //					sample.get(j).setWeight(1f / sampleSize);
 //				}
@@ -69,7 +99,7 @@ public class NBAdaBoost {
 				continue;
 			}
 			if(e == 0){
-				System.out.println("e == 0");
+				//System.out.println("e == 0");
 				//e = Double.MIN_NORMAL;
 				i--;
 				continue;
@@ -77,12 +107,6 @@ public class NBAdaBoost {
 				//break;
 			}
 			//System.out.println(e);
-			//get old weight sum
-			double oldSum = 0;
-			for(Record r : fullTrain){
-				oldSum += r.getWeight();
-			}
-			//System.out.println("oldSum:" + oldSum);
 			//updating weights for tuples 
 			for(int j = 0; j < sampleSize; j++){
 				Record r = sample.get(j);
@@ -90,22 +114,7 @@ public class NBAdaBoost {
 					r.setWeight(r.getWeight() * e / (enlargeFactor - e));
 				}
 			}
-			//get new weight sum
-			double newSum = 0;
-			for(Record r : fullTrain){
-				newSum += r.getWeight();
-			}
-			//System.out.println("newSum:" + newSum);
-			//normalize
-			for(Record r : fullTrain){
-				//not same as the text book
-				r.setWeight(r.getWeight() * oldSum / newSum);
-				//System.out.println(r.getWeight());
-			}
-			newSum = 0;
-			for(Record r : fullTrain){
-				newSum += r.getWeight();
-			}
+			normalize(fullTrain);
 			//System.out.println("Normalized newSum:" + newSum);
 			//computing weight for this classifier
 			weights[i] = Math.log((enlargeFactor - e) / e);
@@ -199,29 +208,43 @@ public class NBAdaBoost {
 		}
 		//System.out.println("minWeight:" + minWeight + ",maxWeight:" + maxWeight);
 		
-		int index = 0;
-		while(result.size() < sampleSize){
-			Record r = fullTrain.get(index);
+		for(Record r : fullTrain){
 			double random = 0;
 			if(maxWeight == minWeight){
 				random = maxWeight;
 			}
 			random = ra.nextDouble() * (maxWeight - minWeight) + minWeight;
 			//System.out.println("random:" + random + ", weight:" + r.getWeight());
-			if(random <= r.getWeight()){
+			if(random / 2 <= r.getWeight()){
 				result.add(r);
 				//System.out.println(index % sampleSize);
 			}
-			index = (index + 1) % sampleSize;
 		}
 		//System.out.println("getting finished");
+		//normalize(result);
 		return result;
 	}
 	
+	private void normalize(LinkedList<Record> sample){
+		double totalWeight = 0;
+		for(Record r : sample){
+			totalWeight += r.getWeight();
+		}
+		//System.out.println("normalize:" + totalWeight);
+		for(Record r : sample){
+			r.setWeight(r.getWeight() / totalWeight);
+		}
+//		totalWeight = 0;
+//		for(Record r : sample){
+//			totalWeight += r.getWeight();
+//		}
+//		System.out.println("after Normalize: " + totalWeight);
+	}
 	
-	private void resetWeight(){
-		for(Record r : fullTrain){
-			r.setWeight(1d * enlargeFactor/sampleSize);
+	
+	private void resetWeight(LinkedList<Record> sample){
+		for(Record r : sample){
+			r.setWeight(1d * enlargeFactor/sample.size());
 			//System.out.println(r.getWeight());
 		}
 	}
@@ -237,11 +260,11 @@ public class NBAdaBoost {
 			System.out.println("usage: java NaiveBayes training_file test_file");
 			return;
 		}
-		NBAdaBoost nba = new NBAdaBoost(15, args[0], args[1]);
+		NBAdaBoost nba = new NBAdaBoost(50, args[0], args[1]);
 		String result = nba.testTrainSample();
 		result += "\n" + nba.testTestSample();
 		System.out.println(result);
-		nba.printWeights();
+		//nba.printWeights();
 	}
 }
 	
