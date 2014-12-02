@@ -1,6 +1,5 @@
 package classification;
 
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.Random;
 
@@ -62,7 +61,6 @@ public class NBAdaBoost {
 //			}
 			
 			String[] results = new String[sampleSize];
-			//what if sample and fullTest can't cover the actual max attributes?
 			classifiers[i] = new NaiveBayes(sample, maxAttribute, totalValue);
 			e = 0;
 			double wrongCount = 0;
@@ -172,20 +170,20 @@ public class NBAdaBoost {
 			}
 		}
 		
-		int all = tp + tn +fp +fn;
-		double precision = (double)tp / (tp + fp);
-		double recall = (double)tp / (tp + fn);
-		System.out.println("accuracy:" + (double)(tp + tn) / all);
-		System.out.println("error rate:" + (double)(fp + fn) / all);
-		System.out.println("sensitivity:" + (double)tp / (tp + fn));
-		System.out.println("specificity:" + (double)tn / (tn + fp));
-		System.out.println("precision:" + precision);
-		System.out.println("F-1 Score:" + (2 * precision * recall / (precision + recall)));
-		System.out.println("FBeta 0.5 Score:" + ((1 + 0.5 * 0.5) * precision * recall / (0.5 * 0.5 * (precision + recall))));
-		System.out.println("FBeta 2 Score:" + ((1 + 2 * 2) * precision * recall / (2 * 2 * (precision + recall))));
-		if(all != sample.size()){
-			System.out.println("WRONG! all = " + all + ", sampleSize = " + sample.size());
-		}
+//		int all = tp + tn +fp +fn;
+//		double precision = (double)tp / (tp + fp);
+//		double recall = (double)tp / (tp + fn);
+//		System.out.println("accuracy:" + (double)(tp + tn) / all);
+//		System.out.println("error rate:" + (double)(fp + fn) / all);
+//		System.out.println("sensitivity:" + (double)tp / (tp + fn));
+//		System.out.println("specificity:" + (double)tn / (tn + fp));
+//		System.out.println("precision:" + precision);
+//		System.out.println("F-1 Score:" + (2 * precision * recall / (precision + recall)));
+//		System.out.println("FBeta 0.5 Score:" + ((1 + 0.5 * 0.5) * precision * recall / (0.5 * 0.5 * precision + recall)));
+//		System.out.println("FBeta 2 Score:" + ((1 + 2 * 2) * precision * recall / (2 * 2 * precision + recall)));
+//		if(all != sample.size()){
+//			System.out.println("WRONG! all = " + all + ", sampleSize = " + sample.size());
+//		}
 		return "" + tp + " " + fn + " " + fp + " " + tn;
 	}
 	
@@ -234,11 +232,6 @@ public class NBAdaBoost {
 		for(Record r : sample){
 			r.setWeight(r.getWeight() / totalWeight);
 		}
-//		totalWeight = 0;
-//		for(Record r : sample){
-//			totalWeight += r.getWeight();
-//		}
-//		System.out.println("after Normalize: " + totalWeight);
 	}
 	
 	

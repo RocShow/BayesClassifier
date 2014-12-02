@@ -9,7 +9,8 @@ import java.util.LinkedList;
 public class FileIO {
 	public static LinkedList<Record> readRecords(String fileName){
 		LinkedList<Record> result = new LinkedList<Record>();
-		try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(fileName));
 			String line = "";
 			while ((line = br.readLine()) != null) {
 				if(line.length() > 0){

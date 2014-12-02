@@ -117,9 +117,6 @@ public class NaiveBayes {
 		
 		double possibilityOfPositive = pxPositive * pPositive;
 		double possibilityOfNegative = pxNegative * pNegative;
-//		if(possibilityOfPositive == possibilityOfNegative){
-//			System.out.println("equal");
-//		}
 		return possibilityOfPositive >= possibilityOfNegative ? "+1" : "-1";
 	}
 	
@@ -160,17 +157,17 @@ public class NaiveBayes {
 			}
 		}
 		
-		int all = tp + tn +fp +fn;
-		double precision = (double)tp / (tp + fp);
-		double recall = (double)tp / (tp + fn);
-		System.out.println("accuracy:" + (double)(tp + tn) / all);
-		System.out.println("error rate:" + (double)(fp + fn) / all);
-		System.out.println("sensitivity:" + (double)tp / (tp + fn));
-		System.out.println("specificity:" + (double)tn / (tn + fp));
-		System.out.println("precision:" + precision);
-		System.out.println("F-1 Score:" + (2 * precision * recall / (precision + recall)));
-		System.out.println("FBeta 0.5 Score:" + ((1 + 0.5 * 0.5) * precision * recall / (0.5 * 0.5 * precision + recall)));
-		System.out.println("FBeta 2 Score:" + ((1 + 2 * 2) * precision * recall / (2 * 2 * precision + recall)));
+//		int all = tp + tn +fp +fn;
+//		double precision = (double)tp / (tp + fp);
+//		double recall = (double)tp / (tp + fn);
+//		System.out.println("accuracy:" + (double)(tp + tn) / all);
+//		System.out.println("error rate:" + (double)(fp + fn) / all);
+//		System.out.println("sensitivity:" + (double)tp / (tp + fn));
+//		System.out.println("specificity:" + (double)tn / (tn + fp));
+//		System.out.println("precision:" + precision);
+//		System.out.println("F-1 Score:" + (2 * precision * recall / (precision + recall)));
+//		System.out.println("FBeta 0.5 Score:" + ((1 + 0.5 * 0.5) * precision * recall / (0.5 * 0.5 * precision + recall)));
+//		System.out.println("FBeta 2 Score:" + ((1 + 2 * 2) * precision * recall / (2 * 2 * precision + recall)));
 		return "" + tp + " " + fn + " " + fp + " " + tn;
 	}
 	
